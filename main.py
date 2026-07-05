@@ -5,7 +5,7 @@ from scraping import ticker_info
 
 st.title('Stock Analysis Data Viz')
 
-ticker_input = st.text_input('Write Ticker')
+ticker_input = st.text_input('Insert Ticker (US markets only)')
 df = ticker_info(ticker_input)
 
 st.divider()

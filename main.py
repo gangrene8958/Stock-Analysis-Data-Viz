@@ -10,7 +10,6 @@ df = ticker_info(ticker_input)
 
 st.divider()
 
-# 3. Selecció dinàmica de columnes
 if df is not None:
     st.dataframe(df)
     available_fields = df.columns.tolist()
@@ -23,10 +22,7 @@ if df is not None:
         st.subheader("Bar Plot")
         
 
-        # Multiselect: l'usuari pot triar tantes com vulgui
-        
-        # 4. Crear el gràfic de barres amb Plotly
-        # barmode='group' posa les barres una al costat de l'altra si n'hi ha més d'una
+
         fig = px.bar(
             df, 
             x=df.index, 
@@ -72,10 +68,10 @@ if df is not None:
                     text=f"<b>CAGR: {cagr:.1f}%</b>",
                     showarrow=False,
                     font=dict(color="white", size=13, family="Arial"),
-                    bgcolor="#51A49E",      # Color de fons de l'etiqueta
-                    bordercolor="#51A49E",  # Color de la vora
+                    bgcolor="#51A49E",      
+                    bordercolor="#51A49E", 
                     borderpad=6,
-                    yshift=15  # Desplaça la lletra una mica cap amunt perquè no la talli la línia
+                    yshift=15  
                 )
         st.plotly_chart(fig, use_container_width=True)
     else:

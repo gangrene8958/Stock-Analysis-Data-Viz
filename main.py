@@ -34,6 +34,7 @@ if df is not None:
     filtered_df = df.loc[start_year: end_year]
 
     st.dataframe(filtered_df)
+    st.markdown("<p style='font-size: 10px; color: #888888;'>*All numbers in millions of $ except per share metrics</p>", unsafe_allow_html=True)
 
     available_fields = filtered_df.columns.tolist()
     selection = st.multiselect(

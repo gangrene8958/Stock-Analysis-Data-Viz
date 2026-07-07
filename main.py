@@ -10,10 +10,21 @@ df = ticker_info(ticker_input)
 
 st.divider()
 
-# 3. Selecció dinàmica de columnes
 if df is not None:
-    st.dataframe(df)
-    available_fields = df.columns.tolist()
+
+    
+    
+    years = df.index.to_list()
+    start_year, end_year = st.select_slider(
+    "Select years range:",
+    options=years,
+    value=(years[0], years[-1])
+    )
+    filtered_df = df.loc[start_year: end_year]
+
+    st.dataframe(filtered_df)
+
+    available_fields = filtered_df.columns.tolist()
     selection = st.multiselect(
     "Select columns to plot",
     options=available_fields
@@ -23,13 +34,9 @@ if df is not None:
         st.subheader("Bar Plot")
         
 
-        # Multiselect: l'usuari pot triar tantes com vulgui
-        
-        # 4. Crear el gràfic de barres amb Plotly
-        # barmode='group' posa les barres una al costat de l'altra si n'hi ha més d'una
         fig = px.bar(
-            df, 
-            x=df.index, 
+            filtered_df, 
+            x=filtered_df.index, 
             y=selection, 
             title=f"Evolution of {', '.join(selection)} - {ticker_input.upper()}",
             barmode='group',
@@ -40,6 +47,7 @@ if df is not None:
         textposition='outside', 
         cliponaxis=False
         )
+        fig.update_xaxes(type='category')
         
         fig.update_layout(
             xaxis_title="Fiscal Year",
@@ -53,22 +61,22 @@ if df is not None:
 
         if on:
             for i in selection:
-                initial_value = float(df[i].iloc[0])
-                final_value = float(df[i].iloc[-1])
+                initial_value = float(filtered_df[i].iloc[0])
+                final_value = float(filtered_df[i].iloc[-1])
 
-                cagr = ((final_value / initial_value) ** (1 / len(df.index)) - 1) * 100
+                cagr = ((final_value / initial_value) ** (1 / len(filtered_df.index)) - 1) * 100
 
                 fig.add_shape(
                 type="line",
-                x0=df.index[0], y0=initial_value,
-                x1=df.index[-1], y1=final_value,
+                x0=filtered_df.index[0], y0=initial_value,
+                x1=filtered_df.index[-1], y1=final_value,
                 line=dict(color="#51A49E", width=2, dash="dash"),
                 )
 
-                idx_middle = len(df) // 2
-                x_middle = df.index[idx_middle]
+                idx_middle = len(filtered_df) // 2
+                x_middle = filtered_df.index[idx_middle]
                 
-                y_middle = initial_value + (final_value - initial_value) * (idx_middle / (len(df) - 1))
+                y_middle = initial_value + (final_value - initial_value) * (idx_middle / (len(filtered_df) - 1))
                 
                 fig.add_annotation(
                     x=x_middle,

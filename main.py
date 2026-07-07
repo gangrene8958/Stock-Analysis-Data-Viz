@@ -5,7 +5,18 @@ from scraping import ticker_info
 
 st.title('Stock Analysis Data Viz')
 
-ticker_input = st.text_input('Write Ticker (only US markets)')
+df_snp500 = pd.read_csv('SP500_tickers_and_names.csv', sep = ';')
+
+selectbox_options = {}
+
+for _, i in df_snp500.iterrows():
+    selectbox_options[i['Ticker']] = f'{i['Name']}   ({i['Ticker']})'
+
+
+
+
+ticker_input =  st.selectbox("Select Ticker",options=df_snp500['Ticker'].tolist(),index = None, format_func=lambda x: selectbox_options.get(x, x))
+
 df = ticker_info(ticker_input)
 
 st.divider()
@@ -48,7 +59,7 @@ if df is not None:
         cliponaxis=False
         )
         fig.update_xaxes(type='category')
-        
+
         fig.update_layout(
             xaxis_title="Fiscal Year",
             yaxis_title="(M$)",
@@ -63,32 +74,32 @@ if df is not None:
             for i in selection:
                 initial_value = float(filtered_df[i].iloc[0])
                 final_value = float(filtered_df[i].iloc[-1])
-
-                cagr = ((final_value / initial_value) ** (1 / len(filtered_df.index)) - 1) * 100
-
-                fig.add_shape(
-                type="line",
-                x0=filtered_df.index[0], y0=initial_value,
-                x1=filtered_df.index[-1], y1=final_value,
-                line=dict(color="#51A49E", width=2, dash="dash"),
-                )
-
-                idx_middle = len(filtered_df) // 2
-                x_middle = filtered_df.index[idx_middle]
                 
-                y_middle = initial_value + (final_value - initial_value) * (idx_middle / (len(filtered_df) - 1))
+                n_periods = len(filtered_df.index) - 1
                 
-                fig.add_annotation(
-                    x=x_middle,
-                    y=y_middle,
-                    text=f"<b>CAGR: {cagr:.1f}%</b>",
-                    showarrow=False,
-                    font=dict(color="white", size=13, family="Arial"),
-                    bgcolor="#51A49E",      # Color de fons de l'etiqueta
-                    bordercolor="#51A49E",  # Color de la vora
-                    borderpad=6,
-                    yshift=15  # Desplaça la lletra una mica cap amunt perquè no la talli la línia
-                )
+                if n_periods > 0 and initial_value > 0:
+                    cagr = ((final_value / initial_value) ** (1 / n_periods) - 1) * 100
+                    
+                    fig.add_shape(
+                        type="line",
+                        x0=0, y0=initial_value,                       
+                        x1=len(filtered_df.index) - 1, y1=final_value, 
+                        line=dict(color="#51A49E", width=2, dash="dash"),
+                    )
+                    
+    
+                    idx_middle = len(filtered_df) // 2
+                    x_middle = idx_middle 
+                    
+                    y_middle = initial_value + (final_value - initial_value) * (idx_middle / (len(filtered_df) - 1))
+                    
+                    fig.add_annotation(
+                        x=x_middle, y=y_middle,
+                        text=f"<b>CAGR: {cagr:.1f}%</b>",
+                        showarrow=False,
+                        font=dict(color="white", size=13),
+                        bgcolor="#51A49E", borderpad=6, yshift=15
+                    )
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("Select a field to plot")
